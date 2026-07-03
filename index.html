@@ -1,0 +1,1194 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAKO PartnerFlow | Creator Marketplace</title>
+    
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Maps for React & Lucide Icons -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.294.0"
+        }
+    }
+    </script>
+    
+    <!-- Babel for in-browser JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Smooth scrolling and custom scrollbar for a premium feel */
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f5f5f4; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-900 font-sans antialiased">
+    
+    <div id="root"></div>
+
+    <!-- The actual React App -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            Megaphone, Users, Link2, BarChart3, Settings, DollarSign, 
+            CheckCircle2, XCircle, Plus, Search, Filter, ArrowRight, 
+            MapPin, Check, Copy, Share2, TrendingUp, Clock, AlertCircle,
+            Instagram, Youtube, Send, LayoutDashboard, Briefcase, ChevronRight
+        } from 'lucide-react';
+
+        // --- MOCK DATA ---
+        const MOCK_COMPANIES = [
+          { id: 'COM_10492', name: 'Kyrgyz Organics', category: 'Food & Beverage', logo: 'KO' },
+          { id: 'COM_10493', name: 'GlowSkin', category: 'Beauty', logo: 'GS' },
+          { id: 'COM_10494', name: 'FitFuel', category: 'Fitness', logo: 'FF' },
+          { id: 'COM_10495', name: 'UrbanWear', category: 'Fashion', logo: 'UW' }
+        ];
+
+        const MOCK_INFLUENCERS = [
+          { id: 'INF_23011', name: 'Sarah Style', followers: '88K', category: 'Fashion/Beauty', handle: '@sarahstyle', views: '25K' },
+          { id: 'INF_23012', name: 'Tech Maks', followers: '156K', category: 'Tech', handle: '@techmaks', views: '60K' },
+          { id: 'INF_23013', name: 'Travel Anna', followers: '210K', category: 'Travel/Lifestyle', handle: '@travelanna', views: '90K' },
+          { id: 'INF_23014', name: 'Food Bishkek', followers: '64K', category: 'Food', handle: '@foodbishkek', views: '15K' }
+        ];
+
+        const MOCK_CAMPAIGNS = [
+          { 
+            id: 'CMP_55678', 
+            company: 'Kyrgyz Organics', 
+            title: 'Bishkek Food Creator Campaign', 
+            product: 'Organic Bread',
+            cpc: 3.00, 
+            influencerEarns: 2.40,
+            platformEarns: 0.60,
+            budget: 15000, 
+            remaining: 12500,
+            status: 'Active',
+            category: 'Food',
+            destination: 'Glovo'
+          },
+          { 
+            id: 'CMP_55679', 
+            company: 'GlowSkin', 
+            title: 'Summer Radiant Serum Launch', 
+            product: 'GlowSkin Serum',
+            cpc: 5.00, 
+            influencerEarns: 4.00,
+            platformEarns: 1.00,
+            budget: 50000, 
+            remaining: 48000,
+            status: 'Active',
+            category: 'Beauty',
+            destination: 'Product Page'
+          },
+          { 
+            id: 'CMP_55680', 
+            company: 'UrbanWear', 
+            title: 'Street Style Hoodie Drop', 
+            product: 'Urban Hoodie',
+            cpc: 2.50, 
+            influencerEarns: 2.00,
+            platformEarns: 0.50,
+            budget: 10000, 
+            remaining: 2000,
+            status: 'Active',
+            category: 'Fashion',
+            destination: 'Instagram Shop'
+          }
+        ];
+
+        const MOCK_APPLICATIONS = [
+          { id: 'APP_1', influencer: MOCK_INFLUENCERS[0], campaign: MOCK_CAMPAIGNS[1], status: 'Pending', message: "I love your serum! My audience is perfect for this." },
+          { id: 'APP_2', influencer: MOCK_INFLUENCERS[3], campaign: MOCK_CAMPAIGNS[0], status: 'Pending', message: "Bishkek foodies follow me for recommendations like this." }
+        ];
+
+        // --- UI COMPONENTS ---
+        const Card = ({ children, className = '' }) => (
+          <div className={`bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden ${className}`}>
+            {children}
+          </div>
+        );
+
+        const Button = ({ children, variant = 'primary', className = '', onClick, type="button" }) => {
+          const base = "px-5 py-2.5 rounded-full font-medium transition-all duration-200 flex items-center justify-center gap-2 text-sm";
+          const variants = {
+            primary: "bg-emerald-900 text-white hover:bg-emerald-800 shadow-md",
+            secondary: "bg-amber-500 text-emerald-950 hover:bg-amber-400 shadow-md",
+            outline: "border-2 border-emerald-900 text-emerald-900 hover:bg-emerald-50",
+            ghost: "text-slate-600 hover:bg-stone-100 hover:text-slate-900",
+            danger: "bg-red-50 text-red-600 hover:bg-red-100"
+          };
+          return (
+            <button type={type} onClick={onClick} className={`${base} ${variants[variant]} ${className}`}>
+              {children}
+            </button>
+          );
+        };
+
+        const Badge = ({ children, variant = 'gray' }) => {
+          const variants = {
+            gray: "bg-stone-100 text-slate-700",
+            green: "bg-emerald-100 text-emerald-800",
+            amber: "bg-amber-100 text-amber-800",
+            blue: "bg-blue-100 text-blue-800"
+          };
+          return (
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${variants[variant]}`}>
+              {children}
+            </span>
+          );
+        };
+
+        // --- VIEWS ---
+
+        const LandingView = ({ navigate }) => (
+          <div className="min-h-screen bg-stone-50">
+            {/* Hero Section */}
+            <header className="bg-emerald-950 text-white rounded-b-[3rem] overflow-hidden relative">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-500 via-transparent to-transparent"></div>
+              <div className="max-w-6xl mx-auto px-6 py-20 lg:py-32 relative z-10 flex flex-col items-center text-center">
+                <Badge variant="amber"><span className="text-amber-900">OAKO PartnerFlow</span></Badge>
+                <h1 className="mt-6 text-5xl lg:text-7xl font-bold tracking-tight max-w-4xl leading-tight">
+                  Creator partnerships that <span className="text-amber-400">pay per performance.</span>
+                </h1>
+                <p className="mt-6 text-lg lg:text-xl text-emerald-100 max-w-2xl">
+                  OAKO PartnerFlow connects brands, influencers, products, custom links, and tracked clicks in one seamless marketplace.
+                </p>
+                <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                  <Button variant="secondary" onClick={() => navigate('company_dashboard')} className="text-base px-8 py-4">I'm a Company</Button>
+                  <Button variant="outline" onClick={() => navigate('influencer_signup')} className="text-base px-8 py-4 bg-white/10 text-white border-white/20 hover:bg-white/20">I'm an Influencer</Button>
+                </div>
+                
+                {/* Mockup Preview */}
+                <div className="mt-20 w-full max-w-5xl mx-auto bg-stone-100 rounded-t-2xl p-2 shadow-2xl border-t border-x border-white/10 h-64 overflow-hidden relative">
+                   <div className="absolute top-4 left-4 right-4 bottom-0 bg-white rounded-t-xl shadow-inner border border-stone-200 p-6 flex gap-6">
+                      <div className="w-1/4 bg-stone-50 rounded-lg p-4 hidden md:block">
+                        <div className="h-4 w-20 bg-stone-200 rounded mb-4"></div>
+                        <div className="space-y-3">
+                          {[1,2,3,4].map(i => <div key={i} className="h-8 w-full bg-stone-200 rounded"></div>)}
+                        </div>
+                      </div>
+                      <div className="flex-1 space-y-6">
+                        <div className="flex justify-between items-center">
+                          <div className="h-6 w-48 bg-stone-200 rounded"></div>
+                          <div className="h-8 w-24 bg-emerald-100 rounded-full"></div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          {[1,2,3].map(i => <div key={i} className="h-24 bg-stone-100 rounded-xl border border-stone-200"></div>)}
+                        </div>
+                      </div>
+                   </div>
+                   <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-stone-100 to-transparent z-20"></div>
+                </div>
+              </div>
+            </header>
+
+            {/* Problem / Solution */}
+            <section className="py-24 max-w-6xl mx-auto px-6">
+              <div className="grid md:grid-cols-2 gap-16 items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-slate-900 mb-6">The old way is scattered.</h2>
+                  <p className="text-lg text-slate-600 mb-8">
+                    Influencers and companies want to work together, but finding partners, negotiating fixed fees, and tracking real ROI is a mess of DMs and spreadsheets.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex gap-4 items-start">
+                      <div className="p-2 bg-red-100 text-red-600 rounded-full"><XCircle size={20} /></div>
+                      <p className="text-slate-700 mt-1">Companies pay upfront without guaranteed results.</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="p-2 bg-red-100 text-red-600 rounded-full"><XCircle size={20} /></div>
+                      <p className="text-slate-700 mt-1">Creators struggle to prove their value to brands.</p>
+                    </div>
+                  </div>
+                </div>
+                <Card className="p-10 bg-emerald-900 text-white border-none relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-16 bg-emerald-800 rounded-full blur-3xl opacity-50"></div>
+                  <h2 className="text-3xl font-bold text-white mb-6 relative z-10">OAKO is the solution.</h2>
+                  <p className="text-lg text-emerald-100 mb-8 relative z-10">
+                    A transparent marketplace where companies post trackable product campaigns, and influencers earn exactly what they generate.
+                  </p>
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex gap-4 items-start">
+                      <div className="p-2 bg-emerald-800 text-emerald-300 rounded-full"><CheckCircle2 size={20} /></div>
+                      <p className="text-emerald-50 mt-1">Companies post products & set a CPC (Cost Per Click).</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="p-2 bg-emerald-800 text-emerald-300 rounded-full"><CheckCircle2 size={20} /></div>
+                      <p className="text-emerald-50 mt-1">Influencers apply. Every click is tracked.</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </section>
+
+            {/* How it works */}
+            <section className="py-24 bg-white border-y border-stone-200">
+              <div className="max-w-6xl mx-auto px-6 text-center">
+                <h2 className="text-3xl font-bold text-slate-900 mb-16">How PartnerFlow Works</h2>
+                <div className="grid md:grid-cols-5 gap-8">
+                  {[
+                    { step: 1, title: 'Post', desc: 'Company posts a campaign', icon: <Briefcase /> },
+                    { step: 2, title: 'Apply', desc: 'Influencer applies to promote', icon: <Send /> },
+                    { step: 3, title: 'Approve', desc: 'Company approves creator', icon: <CheckCircle2 /> },
+                    { step: 4, title: 'Track', desc: 'Custom link is generated', icon: <Link2 /> },
+                    { step: 5, title: 'Earn', desc: 'Clicks become earnings', icon: <DollarSign /> },
+                  ].map((item, i) => (
+                    <div key={i} className="flex flex-col items-center relative">
+                      <div className="w-16 h-16 bg-stone-50 rounded-2xl flex items-center justify-center text-emerald-900 border border-stone-200 shadow-sm mb-6 z-10 relative">
+                        {item.icon}
+                        <div className="absolute -top-3 -right-3 w-6 h-6 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center">{item.step}</div>
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-2">{item.title}</h3>
+                      <p className="text-sm text-slate-500">{item.desc}</p>
+                      {i !== 4 && <div className="hidden md:block absolute top-8 left-[60%] w-full h-[2px] bg-stone-200 z-0"></div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* Business Model */}
+            <section className="py-24 max-w-4xl mx-auto px-6 text-center">
+              <Badge variant="green">Transparent Pricing</Badge>
+              <h2 className="text-3xl font-bold text-slate-900 mt-6 mb-12">The Business Model</h2>
+              <Card className="p-8 border-emerald-100 bg-emerald-50/50">
+                <p className="text-lg text-slate-700 mb-8">Example: Company sets CPC at <strong>3.00 som</strong></p>
+                <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-slate-900 mb-2">2.40 som</div>
+                    <div className="text-sm text-slate-500 uppercase tracking-wide font-semibold">Influencer Earns</div>
+                  </div>
+                  <div className="h-12 w-px bg-stone-300 hidden md:block"></div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-emerald-700 mb-2">0.60 som</div>
+                    <div className="text-sm text-emerald-600/80 uppercase tracking-wide font-semibold">Platform Fee</div>
+                  </div>
+                </div>
+              </Card>
+              
+              <div className="mt-16">
+                <Button onClick={() => navigate('company_dashboard')} className="text-lg px-10 py-5">Launch your first trackable campaign</Button>
+              </div>
+            </section>
+          </div>
+        );
+
+        const InfluencerSignupView = ({ navigate }) => {
+          const [created, setCreated] = useState(false);
+
+          return (
+            <div className="max-w-3xl mx-auto p-6 py-12">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-slate-900">Join as an Influencer</h1>
+                <p className="text-slate-500 mt-2">Create your profile to start applying to campaigns.</p>
+              </div>
+
+              {!created ? (
+                <Card className="p-8">
+                  <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setCreated(true); }}>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Full Name / Nickname</label>
+                        <input type="text" className="w-full rounded-lg border-stone-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border" placeholder="Sarah Style" required/>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">City / Country</label>
+                        <input type="text" className="w-full rounded-lg border-stone-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border" placeholder="Bishkek, Kyrgyzstan" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Bio</label>
+                      <textarea rows="3" className="w-full rounded-lg border-stone-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border" placeholder="Lifestyle and fashion creator..."></textarea>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Main Category</label>
+                      <select className="w-full rounded-lg border-stone-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border">
+                        <option>Fashion & Beauty</option>
+                        <option>Food & Dining</option>
+                        <option>Tech & Gaming</option>
+                        <option>Travel & Lifestyle</option>
+                      </select>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Instagram Handle</label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-stone-200 bg-stone-50 text-stone-500">@</span>
+                          <input type="text" className="flex-1 rounded-none rounded-r-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500" placeholder="username" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Total Followers</label>
+                        <input type="text" className="w-full rounded-lg border-stone-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border" placeholder="e.g. 50K" />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-stone-100">
+                      <Button type="submit" className="w-full">Create Influencer Profile</Button>
+                    </div>
+                  </form>
+                </Card>
+              ) : (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <Card className="p-8 text-center bg-gradient-to-b from-emerald-50 to-white">
+                    <div className="w-24 h-24 bg-stone-200 rounded-full mx-auto mb-4 border-4 border-white shadow-lg overflow-hidden">
+                       <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Sarah" alt="Avatar" className="w-full h-full object-cover" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900">Sarah Style</h2>
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <Badge variant="blue">Fashion</Badge>
+                      <Badge variant="blue">Beauty</Badge>
+                    </div>
+                    
+                    <div className="flex justify-center gap-6 mt-6">
+                      <div className="text-center">
+                        <div className="text-xl font-bold text-slate-900">88K</div>
+                        <div className="text-xs text-slate-500 uppercase">Followers</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-bold text-slate-900">92</div>
+                        <div className="text-xs text-slate-500 uppercase">Trust Score</div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center gap-3 mt-6">
+                       <div className="p-2 bg-stone-100 text-stone-600 rounded-full"><Instagram size={18}/></div>
+                       <div className="p-2 bg-stone-100 text-stone-600 rounded-full"><Youtube size={18}/></div>
+                       <div className="p-2 bg-stone-100 text-stone-600 rounded-full"><Send size={18}/></div>
+                    </div>
+                  </Card>
+                  
+                  <div className="text-center">
+                    <Button onClick={() => navigate('marketplace')} className="text-lg px-8 py-3">Browse Available Campaigns</Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const CompanyDashboardView = ({ navigate }) => {
+          return (
+            <div className="p-6 max-w-7xl mx-auto space-y-6">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">Company Dashboard</h1>
+                  <p className="text-slate-500 mt-1">Kyrgyz Organics • Food & Beverage</p>
+                </div>
+                <Button onClick={() => navigate('campaign_builder')}><Plus size={18}/> Create Campaign</Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                  { title: 'Active Campaigns', val: '3', icon: <Megaphone size={20}/>, trend: '+1 this week' },
+                  { title: 'Pending Applications', val: '12', icon: <Users size={20}/>, trend: 'Requires review', alert: true },
+                  { title: 'Total Clicks', val: '4,521', icon: <BarChart3 size={20}/>, trend: '+12% vs last month' },
+                  { title: 'Budget Spent', val: '13,563 som', icon: <DollarSign size={20}/>, trend: 'Out of 50k budget' }
+                ].map((stat, i) => (
+                  <Card key={i} className={`p-6 ${stat.alert ? 'border-amber-300 bg-amber-50/30' : ''}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-2 rounded-lg ${stat.alert ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-800'}`}>
+                        {stat.icon}
+                      </div>
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">{stat.title}</h3>
+                    <div className="text-2xl font-bold text-slate-900 mt-1">{stat.val}</div>
+                    <div className={`text-xs mt-2 font-medium ${stat.alert ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {stat.trend}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6 mt-8">
+                <Card className="col-span-2 p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold text-slate-900">Active Campaigns</h2>
+                    <Button variant="ghost" className="text-sm">View All</Button>
+                  </div>
+                  <div className="space-y-4">
+                    {MOCK_CAMPAIGNS.slice(0,2).map((c, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-stone-200 rounded-lg flex items-center justify-center text-stone-500">
+                            Img
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-slate-900">{c.title}</h4>
+                            <p className="text-sm text-slate-500">{c.budget - c.remaining} / {c.budget} som spent</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-emerald-700">{c.cpc} som</div>
+                          <div className="text-xs text-slate-500">per click</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-bold text-slate-900">Action Required</h2>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-4 items-start">
+                      <AlertCircle className="text-amber-500 mt-1" size={20}/>
+                      <div>
+                        <h4 className="font-semibold text-amber-900">2 New Applications</h4>
+                        <p className="text-sm text-amber-700/80 mt-1 mb-3">Influencers want to promote Bishkek Food Campaign.</p>
+                        <Button variant="secondary" onClick={() => navigate('company_applications')} className="text-xs py-1.5 px-3">Review Now</Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          );
+        };
+
+        const CampaignBuilderView = ({ navigate }) => {
+          return (
+            <div className="max-w-4xl mx-auto p-6 py-8">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-slate-900">Create New Campaign</h1>
+                <p className="text-slate-500 mt-2">Set up your product, budget, and tracking destination.</p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 space-y-6">
+                  <Card className="p-6">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-stone-100 pb-2">1. Product Details</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Campaign Title</label>
+                        <input type="text" className="w-full rounded-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500" defaultValue="Organic Sourdough Promotion" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Product Name</label>
+                        <input type="text" className="w-full rounded-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500" defaultValue="Artisan Sourdough Loaf" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Destination Link Type</label>
+                        <div className="flex gap-2">
+                          {['Glovo', 'Yandex', 'Instagram', 'Custom URL'].map((type, i) => (
+                            <Badge key={i} variant={i === 0 ? 'green' : 'gray'}>{type}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Target URL</label>
+                        <input type="url" className="w-full rounded-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500" defaultValue="https://glovoapp.com/kg/..." />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-stone-100 pb-2">2. Budget & Payouts</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Pay Per Click (CPC) in som</label>
+                        <input type="number" className="w-full rounded-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500 text-lg font-bold text-emerald-900" defaultValue="3.00" />
+                        <p className="text-xs text-slate-500 mt-2">Influencer earns 2.40s. Platform fee 0.60s.</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Total Campaign Budget</label>
+                        <input type="number" className="w-full rounded-lg border-stone-200 px-4 py-2 border focus:border-emerald-500 focus:ring-emerald-500" defaultValue="15000" />
+                      </div>
+                    </div>
+                  </Card>
+                  
+                  <div className="flex justify-end gap-4">
+                     <Button variant="ghost" onClick={() => navigate('company_dashboard')}>Cancel</Button>
+                     <Button onClick={() => navigate('company_dashboard')}>Publish Campaign</Button>
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div>
+                  <h3 className="text-sm font-bold text-slate-500 uppercase mb-4 tracking-wider">Marketplace Preview</h3>
+                  <Card className="p-0 border-emerald-200 shadow-md">
+                    <div className="h-32 bg-stone-200 relative">
+                       <div className="absolute top-2 left-2"><Badge variant="green">Glovo Link</Badge></div>
+                    </div>
+                    <div className="p-5">
+                      <div className="text-xs text-slate-500 font-semibold mb-1">Kyrgyz Organics</div>
+                      <h4 className="font-bold text-slate-900 leading-tight mb-4">Organic Sourdough Promotion</h4>
+                      
+                      <div className="flex justify-between items-center p-3 bg-stone-50 rounded-lg mb-4 border border-stone-100">
+                        <div>
+                          <div className="text-xs text-slate-500">Pay per click</div>
+                          <div className="font-bold text-emerald-700 text-lg">3.00 som</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-slate-500">Budget</div>
+                          <div className="font-bold text-slate-900">15k</div>
+                        </div>
+                      </div>
+                      
+                      <Button className="w-full" variant="outline">Apply to Promote</Button>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const MarketplaceView = ({ navigate }) => {
+          const [selectedCampaign, setSelectedCampaign] = useState(null);
+
+          return (
+            <div className="p-6 max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">Campaign Marketplace</h1>
+                  <p className="text-slate-500 mt-1">Find products to promote and earn per click.</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 text-stone-400" size={18} />
+                    <input type="text" placeholder="Search campaigns..." className="pl-10 pr-4 py-2 border border-stone-200 rounded-full text-sm w-64 focus:ring-emerald-500 focus:border-emerald-500" />
+                  </div>
+                  <Button variant="outline" className="px-3"><Filter size={18}/> Filters</Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {MOCK_CAMPAIGNS.map((campaign, i) => (
+                  <Card key={i} className="flex flex-col h-full hover:shadow-lg transition-shadow cursor-pointer border-stone-200 hover:border-emerald-300">
+                    <div className="h-40 bg-stone-100 relative p-4 flex flex-col justify-between" style={{backgroundImage: `linear-gradient(45deg, #f5f5f4 25%, transparent 25%, transparent 75%, #f5f5f4 75%, #f5f5f4), linear-gradient(45deg, #f5f5f4 25%, transparent 25%, transparent 75%, #f5f5f4 75%, #f5f5f4)`, backgroundSize: `20px 20px`, backgroundPosition: `0 0, 10px 10px`}}>
+                       <div className="flex justify-between">
+                         <Badge variant="blue">{campaign.category}</Badge>
+                         <Badge variant="gray">{campaign.destination}</Badge>
+                       </div>
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">{campaign.company}</div>
+                      <h3 className="font-bold text-lg text-slate-900 mb-2 line-clamp-2">{campaign.title}</h3>
+                      <p className="text-sm text-slate-500 mb-6">Promote {campaign.product}. Requires approval.</p>
+                      
+                      <div className="mt-auto">
+                        <div className="flex justify-between items-center mb-4 p-3 bg-stone-50 rounded-xl border border-stone-100">
+                          <div>
+                            <div className="text-xs text-slate-500">You Earn</div>
+                            <div className="font-bold text-emerald-700 text-xl">{campaign.influencerEarns.toFixed(2)}<span className="text-sm text-emerald-600/80">s/click</span></div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-slate-500">Pool</div>
+                            <div className="font-bold text-slate-700">{campaign.remaining}s</div>
+                          </div>
+                        </div>
+                        <Button className="w-full" onClick={() => setSelectedCampaign(campaign)}>Apply to Promote</Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Apply Modal */}
+              {selectedCampaign && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                  <Card className="max-w-md w-full p-6 shadow-2xl">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold text-slate-900">Apply to Campaign</h3>
+                      <button onClick={() => setSelectedCampaign(null)} className="text-stone-400 hover:text-slate-900"><XCircle/></button>
+                    </div>
+                    
+                    <div className="mb-6 bg-stone-50 p-4 rounded-xl border border-stone-100">
+                       <div className="font-semibold text-slate-900">{selectedCampaign.title}</div>
+                       <div className="text-sm text-slate-500">By {selectedCampaign.company} • Earn {selectedCampaign.influencerEarns.toFixed(2)} som / click</div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Message to Brand (Optional)</label>
+                        <textarea rows="3" className="w-full rounded-lg border-stone-200 px-3 py-2 border focus:ring-emerald-500 focus:border-emerald-500" placeholder="Why are you a good fit?"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Platform you will use</label>
+                        <select className="w-full rounded-lg border-stone-200 px-3 py-2 border focus:ring-emerald-500 focus:border-emerald-500">
+                          <option>Instagram Stories</option>
+                          <option>Telegram Channel</option>
+                          <option>TikTok</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex gap-3">
+                      <Button variant="ghost" className="flex-1" onClick={() => setSelectedCampaign(null)}>Cancel</Button>
+                      <Button className="flex-1" onClick={() => {
+                        alert("Application sent! (Mock)");
+                        setSelectedCampaign(null);
+                        navigate('influencer_dashboard');
+                      }}>Submit Application</Button>
+                    </div>
+                  </Card>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const CompanyApplicationsView = ({ navigate }) => {
+          const [approvedId, setApprovedId] = useState(null);
+
+          return (
+            <div className="p-6 max-w-5xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-slate-900">Review Applications</h1>
+                <p className="text-slate-500 mt-1">Approve influencers to generate their tracking links.</p>
+              </div>
+
+              <div className="space-y-6">
+                {MOCK_APPLICATIONS.map((app) => (
+                  <Card key={app.id} className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                      <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xl font-bold shrink-0">
+                        {app.influencer.name.charAt(0)}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">{app.influencer.name}</h3>
+                            <div className="text-sm text-slate-500">{app.influencer.category} • {app.influencer.handle}</div>
+                          </div>
+                          <div className="text-right">
+                             <div className="font-bold text-slate-900">{app.influencer.followers}</div>
+                             <div className="text-xs text-slate-500 uppercase">Followers</div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-stone-50 p-4 rounded-xl text-sm text-slate-700 italic border border-stone-100 mb-4">
+                          "{app.message}"
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-slate-600 mb-6">
+                          <MapPin size={16}/> Applying for: <span className="font-semibold text-slate-900">{app.campaign.title}</span>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button variant="primary" onClick={() => setApprovedId(app.id)}><CheckCircle2 size={18}/> Approve & Generate Link</Button>
+                          <Button variant="danger">Reject</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Success Modal */}
+              {approvedId && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <Card className="max-w-md w-full p-8 text-center shadow-2xl border-emerald-500 border-t-4">
+                    <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Check size={32}/>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Influencer Approved!</h3>
+                    <p className="text-slate-600 mb-6">A unique tracking link has been generated and sent to the influencer.</p>
+                    <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 mb-6 font-mono text-sm break-all">
+                      oako.kg/r/{MOCK_APPLICATIONS.find(a=>a.id===approvedId)?.influencer.name.toLowerCase().replace(' ','-')}-{MOCK_APPLICATIONS.find(a=>a.id===approvedId)?.campaign.id.toLowerCase()}
+                    </div>
+                    <Button className="w-full" onClick={() => {
+                      setApprovedId(null);
+                      navigate('tracking_link');
+                    }}>View Tracking Details</Button>
+                  </Card>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const TrackingLinkView = () => {
+          return (
+            <div className="p-6 max-w-4xl mx-auto">
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="green">Active Link</Badge>
+                  <span className="text-sm text-slate-500">Created today</span>
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900">Custom Tracking Link</h1>
+                <p className="text-slate-500 mt-1">Sarah Style × Bishkek Food Creator Campaign</p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-6">
+                  <Card className="p-8 border-emerald-200 shadow-md bg-gradient-to-br from-white to-emerald-50/30">
+                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Shareable URL</h3>
+                    <div className="flex bg-white border border-stone-200 rounded-xl overflow-hidden shadow-sm">
+                      <div className="px-4 py-4 font-mono text-slate-800 flex-1 truncate">
+                        oako.kg/r/sarah-style-cmp55678
+                      </div>
+                      <button className="bg-emerald-900 text-white px-6 hover:bg-emerald-800 transition-colors flex items-center gap-2 font-medium">
+                        <Copy size={18}/> Copy
+                      </button>
+                    </div>
+                    <div className="flex gap-4 mt-6">
+                      <Button variant="outline" className="flex-1 bg-white"><Share2 size={16}/> Share</Button>
+                      <div className="flex gap-2">
+                        <button className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors"><Instagram size={18}/></button>
+                        <button className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors"><Send size={18}/></button>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <h3 className="text-lg font-bold text-slate-900 mb-4">Link Metadata</h3>
+                    <div className="grid grid-cols-2 gap-y-4 text-sm">
+                      <div>
+                        <div className="text-slate-500 mb-1">Product ID</div>
+                        <div className="font-mono text-slate-900 bg-stone-100 px-2 py-1 rounded inline-block">PRD_78945</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">Campaign ID</div>
+                        <div className="font-mono text-slate-900 bg-stone-100 px-2 py-1 rounded inline-block">CMP_55678</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">Influencer ID</div>
+                        <div className="font-mono text-slate-900 bg-stone-100 px-2 py-1 rounded inline-block">INF_23011</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-500 mb-1">Company ID</div>
+                        <div className="font-mono text-slate-900 bg-stone-100 px-2 py-1 rounded inline-block">COM_10492</div>
+                      </div>
+                      <div className="col-span-2 mt-2">
+                        <div className="text-slate-500 mb-1">Destination URL</div>
+                        <div className="text-blue-600 truncate">https://glovoapp.com/kg/en/bishkek/kyrgyz-organics/product/bread</div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                <div className="space-y-6">
+                  <Card className="p-6 text-center">
+                    <div className="w-32 h-32 mx-auto bg-stone-100 rounded-xl mb-4 p-2 border border-stone-200 flex items-center justify-center">
+                       {/* Mock QR Code */}
+                       <div className="grid grid-cols-5 grid-rows-5 gap-1 w-full h-full opacity-40">
+                          {Array.from({length: 25}).map((_, i) => (
+                            <div key={i} className={`bg-slate-800 rounded-sm ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-0'}`}></div>
+                          ))}
+                       </div>
+                    </div>
+                    <h4 className="font-bold text-slate-900 mb-1">QR Code</h4>
+                    <p className="text-xs text-slate-500 mb-4">Scan to test the redirect link.</p>
+                    <Button variant="secondary" className="w-full text-xs">Download QR</Button>
+                  </Card>
+                  
+                  <Card className="p-6">
+                    <h4 className="font-bold text-slate-900 mb-4">Live Stats</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-xs text-slate-500 uppercase">Clicks Today</div>
+                        <div className="text-2xl font-bold text-emerald-700">0</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-500 uppercase">Total Clicks</div>
+                        <div className="text-2xl font-bold text-slate-900">0</div>
+                      </div>
+                      <div className="pt-4 border-t border-stone-100">
+                        <div className="text-xs text-slate-500 uppercase">Est. Earnings</div>
+                        <div className="text-xl font-bold text-amber-600">0.00 som</div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const InfluencerDashboardView = ({ navigate }) => {
+          return (
+            <div className="p-6 max-w-7xl mx-auto space-y-8">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">My Earnings</h1>
+                  <p className="text-slate-500 mt-1">Track your performance and payouts.</p>
+                </div>
+                <Button onClick={() => navigate('marketplace')}>Find Campaigns</Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card className="p-6 bg-emerald-900 text-white border-none">
+                  <div className="text-emerald-300 text-sm font-medium mb-2 flex justify-between">Payable Earnings <DollarSign size={16}/></div>
+                  <div className="text-3xl font-bold text-white mb-1">4,250 <span className="text-xl text-emerald-400 font-normal">som</span></div>
+                  <div className="text-xs text-emerald-200">Ready for withdrawal</div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-slate-500 text-sm font-medium mb-2 flex justify-between">Pending Review <Clock size={16}/></div>
+                  <div className="text-2xl font-bold text-slate-900 mb-1">840 som</div>
+                  <div className="text-xs text-amber-600">Awaiting quality check</div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-slate-500 text-sm font-medium mb-2 flex justify-between">Total Clicks <TrendingUp size={16}/></div>
+                  <div className="text-2xl font-bold text-slate-900 mb-1">2,154</div>
+                  <div className="text-xs text-emerald-600">+124 today</div>
+                </Card>
+                <Card className="p-6">
+                  <div className="text-slate-500 text-sm font-medium mb-2 flex justify-between">Paid Out <CheckCircle2 size={16}/></div>
+                  <div className="text-2xl font-bold text-slate-400 mb-1">12,500 som</div>
+                  <div className="text-xs text-slate-400">Lifetime earnings</div>
+                </Card>
+              </div>
+
+              <Card className="overflow-hidden">
+                <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+                  <h2 className="text-lg font-bold text-slate-900">Campaign Performance</h2>
+                  <span className="text-xs text-slate-500 flex items-center gap-1"><AlertCircle size={12}/> Clicks are reviewed for quality before becoming payable.</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-stone-50 text-slate-500 uppercase text-xs">
+                      <tr>
+                        <th className="px-6 py-4 font-semibold">Campaign</th>
+                        <th className="px-6 py-4 font-semibold">Company</th>
+                        <th className="px-6 py-4 font-semibold">Valid Clicks</th>
+                        <th className="px-6 py-4 font-semibold">Pay Per Click</th>
+                        <th className="px-6 py-4 font-semibold">Earnings</th>
+                        <th className="px-6 py-4 font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      <tr className="hover:bg-stone-50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-slate-900">Summer Radiant Serum Launch</td>
+                        <td className="px-6 py-4 text-slate-600">GlowSkin</td>
+                        <td className="px-6 py-4 font-mono text-slate-700">850</td>
+                        <td className="px-6 py-4 text-emerald-700 font-medium">4.00s</td>
+                        <td className="px-6 py-4 font-bold text-slate-900">3,400s</td>
+                        <td className="px-6 py-4"><Badge variant="green">Payable</Badge></td>
+                      </tr>
+                      <tr className="hover:bg-stone-50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-slate-900">Bishkek Food Creator</td>
+                        <td className="px-6 py-4 text-slate-600">Kyrgyz Organics</td>
+                        <td className="px-6 py-4 font-mono text-slate-700">354</td>
+                        <td className="px-6 py-4 text-emerald-700 font-medium">2.40s</td>
+                        <td className="px-6 py-4 font-bold text-slate-900">849.60s</td>
+                        <td className="px-6 py-4"><Badge variant="amber">Pending Review</Badge></td>
+                      </tr>
+                      <tr className="hover:bg-stone-50 transition-colors opacity-75">
+                        <td className="px-6 py-4 font-medium text-slate-900">Spring Collection</td>
+                        <td className="px-6 py-4 text-slate-600">UrbanWear</td>
+                        <td className="px-6 py-4 font-mono text-slate-700">1,200</td>
+                        <td className="px-6 py-4 text-emerald-700 font-medium">2.00s</td>
+                        <td className="px-6 py-4 font-bold text-slate-900">2,400s</td>
+                        <td className="px-6 py-4"><Badge variant="gray">Paid</Badge></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
+          );
+        };
+
+        const CompanyAnalyticsView = () => {
+          return (
+            <div className="p-6 max-w-7xl mx-auto space-y-8">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold text-slate-900">Analytics Overview</h1>
+                <p className="text-slate-500 mt-1">Track ROI, click quality, and campaign spend.</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <Card className="p-6 border-t-4 border-t-emerald-500">
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Payable Clicks</div>
+                  <div className="text-3xl font-bold text-slate-900">12,450</div>
+                </Card>
+                <Card className="p-6 border-t-4 border-t-red-400">
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Rejected (Duplicates/Bots)</div>
+                  <div className="text-3xl font-bold text-slate-900">1,104</div>
+                  <div className="text-xs text-red-500 mt-2 font-medium">8.1% blocked rate</div>
+                </Card>
+                <Card className="p-6 border-t-4 border-t-amber-500">
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total Spend</div>
+                  <div className="text-3xl font-bold text-slate-900">37,350s</div>
+                </Card>
+                <Card className="p-6 border-t-4 border-t-blue-500">
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Approved Creators</div>
+                  <div className="text-3xl font-bold text-slate-900">24</div>
+                </Card>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="p-6">
+                  <h3 className="font-bold text-slate-900 mb-6">Clicks Over Time (Mock)</h3>
+                  <div className="h-48 flex items-end justify-between gap-2 px-2">
+                    {[30, 45, 25, 60, 85, 70, 95].map((h, i) => (
+                      <div key={i} className="w-full bg-emerald-100 rounded-t-sm relative group hover:bg-emerald-200 transition-colors" style={{height: `${h}%`}}>
+                         <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500 rounded-t-sm"></div>
+                         {/* Tooltip mock */}
+                         <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2 py-1 rounded pointer-events-none whitespace-nowrap transition-opacity z-10">
+                           Day {i+1}: {h*10} clicks
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-xs text-slate-400 mt-3 font-medium">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <h3 className="font-bold text-slate-900 mb-6">Top Performing Influencers</h3>
+                  <div className="space-y-4">
+                    {[
+                      {name: 'Sarah Style', clicks: '4,210', spend: '12,630s', w: '100%'},
+                      {name: 'Tech Maks', clicks: '2,850', spend: '8,550s', w: '70%'},
+                      {name: 'Travel Anna', clicks: '1,920', spend: '5,760s', w: '45%'}
+                    ].map((inf, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="font-medium text-slate-900">{inf.name}</span>
+                          <span className="text-slate-500">{inf.clicks} clicks</span>
+                        </div>
+                        <div className="w-full bg-stone-100 rounded-full h-2">
+                          <div className="bg-amber-500 h-2 rounded-full" style={{width: inf.w}}></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </div>
+          );
+        };
+
+        const AdminDashboardView = () => {
+          return (
+            <div className="p-6 max-w-7xl mx-auto space-y-6">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-2 bg-slate-900 text-white rounded-lg"><Settings size={24}/></div>
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">Platform Admin</h1>
+                  <p className="text-slate-500 mt-1">System overview, revenue, and fraud prevention.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <Card className="p-4 bg-slate-900 text-white">
+                  <div className="text-slate-400 text-xs mb-1 uppercase">Platform Revenue</div>
+                  <div className="text-2xl font-bold text-amber-400">45,210s</div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-slate-500 text-xs mb-1 uppercase">Total Companies</div>
+                  <div className="text-2xl font-bold text-slate-900">142</div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-slate-500 text-xs mb-1 uppercase">Total Creators</div>
+                  <div className="text-2xl font-bold text-slate-900">856</div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-slate-500 text-xs mb-1 uppercase">Active Campaigns</div>
+                  <div className="text-2xl font-bold text-slate-900">89</div>
+                </Card>
+                <Card className="p-4 bg-red-50 border-red-100">
+                  <div className="text-red-600 text-xs mb-1 uppercase font-bold flex items-center gap-1"><AlertCircle size={12}/> Suspicious Activity</div>
+                  <div className="text-2xl font-bold text-red-700">12 links</div>
+                </Card>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                 <Card className="p-0 overflow-hidden">
+                   <div className="p-5 border-b border-stone-100 bg-stone-50 flex justify-between items-center">
+                     <h3 className="font-bold text-slate-900">Pending Payouts (Creators)</h3>
+                     <Badge variant="amber">Needs Action</Badge>
+                   </div>
+                   <div className="divide-y divide-stone-100">
+                     {[1,2,3].map(i => (
+                       <div key={i} className="p-4 flex justify-between items-center hover:bg-stone-50">
+                         <div>
+                           <div className="font-semibold text-slate-900">Travel Anna</div>
+                           <div className="text-xs text-slate-500">Mbank: +996 555 123456</div>
+                         </div>
+                         <div className="text-right flex items-center gap-4">
+                           <div className="font-bold text-slate-900">14,500s</div>
+                           <Button variant="outline" className="text-xs py-1 px-3">Mark Paid</Button>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </Card>
+                 
+                 <Card className="p-0 overflow-hidden">
+                   <div className="p-5 border-b border-stone-100 bg-stone-50">
+                     <h3 className="font-bold text-slate-900">Recent Suspicious Clicks Flagged</h3>
+                   </div>
+                   <div className="divide-y divide-stone-100">
+                     {[1,2,3].map(i => (
+                       <div key={i} className="p-4 flex justify-between items-center hover:bg-stone-50">
+                         <div>
+                           <div className="font-mono text-xs text-red-600 bg-red-50 px-2 py-1 rounded inline-block mb-1">IP: 185.xxx.xx.xx (Data Center)</div>
+                           <div className="text-sm text-slate-900">Link: oako.kg/r/tech-maks-cmp123</div>
+                         </div>
+                         <div className="text-right">
+                           <div className="text-xs font-bold text-slate-700">45 clicks blocked</div>
+                           <div className="text-xs text-slate-400">10 mins ago</div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </Card>
+              </div>
+            </div>
+          );
+        };
+
+        // --- MAIN APP COMPONENT ---
+        const App = () => {
+          const [currentView, setCurrentView] = useState('landing');
+          const [role, setRole] = useState('guest'); // guest, influencer, company, admin
+          const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+          // Helper to change view and automatically set appropriate role context
+          const navigate = (view) => {
+            setCurrentView(view);
+            if(view.includes('influencer') || view === 'marketplace') setRole('influencer');
+            else if(view.includes('company') || view === 'campaign_builder' || view === 'tracking_link') setRole('company');
+            else if(view === 'admin') setRole('admin');
+            else if(view === 'landing') setRole('guest');
+            
+            setIsMobileMenuOpen(false);
+            window.scrollTo(0,0);
+          };
+
+          const TopNavigation = () => (
+            <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-stone-200 shadow-sm">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                {/* Logo */}
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('landing')}>
+                  <div className="w-8 h-8 bg-emerald-900 rounded-lg flex items-center justify-center text-amber-400 font-bold text-xl">O</div>
+                  <span className="font-bold text-xl tracking-tight text-slate-900">PartnerFlow</span>
+                </div>
+
+                {/* Desktop Prototype Controls (Role Switcher & Navigation) */}
+                <div className="hidden lg:flex items-center gap-6">
+                  {/* Contextual Menus based on Role */}
+                  {role === 'influencer' && (
+                    <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-full">
+                      <button onClick={() => navigate('marketplace')} className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${currentView === 'marketplace' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Marketplace</button>
+                      <button onClick={() => navigate('influencer_dashboard')} className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${currentView === 'influencer_dashboard' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Earnings</button>
+                    </div>
+                  )}
+                  
+                  {role === 'company' && (
+                    <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-full">
+                      <button onClick={() => navigate('company_dashboard')} className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${currentView === 'company_dashboard' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Dashboard</button>
+                      <button onClick={() => navigate('company_applications')} className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${currentView === 'company_applications' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Applications</button>
+                      <button onClick={() => navigate('company_analytics')} className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${currentView === 'company_analytics' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>Analytics</button>
+                    </div>
+                  )}
+
+                  {/* Prototype Global Switcher */}
+                  <div className="flex items-center gap-3 border-l border-stone-200 pl-6">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Prototype Views:</span>
+                    <select 
+                      value={currentView}
+                      onChange={(e) => navigate(e.target.value)}
+                      className="text-sm bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 font-medium text-slate-700 outline-none focus:border-emerald-500"
+                    >
+                      <optgroup label="Public">
+                        <option value="landing">Landing Page</option>
+                      </optgroup>
+                      <optgroup label="Influencer Flow">
+                        <option value="influencer_signup">Signup / Profile</option>
+                        <option value="marketplace">Marketplace</option>
+                        <option value="influencer_dashboard">Earnings Dashboard</option>
+                      </optgroup>
+                      <optgroup label="Company Flow">
+                        <option value="company_dashboard">Company Dashboard</option>
+                        <option value="campaign_builder">Campaign Builder</option>
+                        <option value="company_applications">Review Applications</option>
+                        <option value="tracking_link">Generated Tracking Link</option>
+                        <option value="company_analytics">Analytics Dashboard</option>
+                      </optgroup>
+                      <optgroup label="Admin">
+                        <option value="admin">Platform Admin</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Mobile menu button */}
+                <button className="lg:hidden text-slate-900 p-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                   <LayoutDashboard />
+                </button>
+              </div>
+
+              {/* Mobile Menu Dropdown */}
+              {isMobileMenuOpen && (
+                <div className="lg:hidden bg-white border-b border-stone-200 p-4 shadow-xl">
+                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Switch Prototype View</div>
+                   <div className="grid grid-cols-1 gap-2">
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('landing')}>Landing Page</Button>
+                      <div className="h-px bg-stone-100 my-1"></div>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('marketplace')}>Influencer: Marketplace</Button>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('influencer_dashboard')}>Influencer: Earnings</Button>
+                      <div className="h-px bg-stone-100 my-1"></div>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('company_dashboard')}>Company: Dashboard</Button>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('campaign_builder')}>Company: Create Campaign</Button>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('company_applications')}>Company: Review Apps</Button>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('company_analytics')}>Company: Analytics</Button>
+                      <div className="h-px bg-stone-100 my-1"></div>
+                      <Button variant="ghost" className="justify-start text-left" onClick={() => navigate('admin')}>Platform Admin</Button>
+                   </div>
+                </div>
+              )}
+            </nav>
+          );
+
+          return (
+            <div className="min-h-screen bg-stone-50 flex flex-col">
+              <TopNavigation />
+              
+              <main className="flex-grow">
+                {currentView === 'landing' && <LandingView navigate={navigate} />}
+                {currentView === 'influencer_signup' && <InfluencerSignupView navigate={navigate} />}
+                {currentView === 'company_signup' && <CompanyDashboardView navigate={navigate} /> /* Redirect to dash for prototype */}
+                {currentView === 'company_dashboard' && <CompanyDashboardView navigate={navigate} />}
+                {currentView === 'campaign_builder' && <CampaignBuilderView navigate={navigate} />}
+                {currentView === 'marketplace' && <MarketplaceView navigate={navigate} />}
+                {currentView === 'company_applications' && <CompanyApplicationsView navigate={navigate} />}
+                {currentView === 'tracking_link' && <TrackingLinkView />}
+                {currentView === 'influencer_dashboard' && <InfluencerDashboardView navigate={navigate} />}
+                {currentView === 'company_analytics' && <CompanyAnalyticsView />}
+                {currentView === 'admin' && <AdminDashboardView />}
+              </main>
+              
+              {/* Footer */}
+              {currentView === 'landing' && (
+                <footer className="bg-slate-950 text-slate-400 py-12 text-center text-sm">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className="w-6 h-6 bg-emerald-900 rounded flex items-center justify-center text-amber-400 font-bold text-xs">O</div>
+                    <span className="font-bold text-lg tracking-tight text-white">PartnerFlow</span>
+                  </div>
+                  <p>© 2026 OAKO PartnerFlow. Where every click counts.</p>
+                </footer>
+              )}
+            </div>
+          );
+        };
+
+        // Render the app
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
+```
